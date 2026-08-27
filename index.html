@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boutique Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root{
+    --plum:#3B1F2B;
+    --plum-deep:#2A1620;
+    --rose:#C98B96;
+    --ivory:#F7F0EA;
+    --gold:#B08D57;
+    --ink:#2A2223;
+    --line:#E4D9D0;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--ivory); color:var(--ink); font-family:'Jost',sans-serif; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
+
+  header{
+    position:sticky; top:0; z-index:40; background:var(--plum); color:var(--ivory);
+    padding:18px 24px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brandmark{font-family:'Cormorant Garamond',serif; font-size:26px; letter-spacing:0.06em; font-weight:600;}
+  .brandmark span{color:var(--gold);}
+  .cart-btn{
+    position:relative; background:transparent; border:1px solid var(--gold); color:var(--ivory);
+    padding:9px 16px; font-family:'Jost',sans-serif; font-size:13px; letter-spacing:0.08em;
+    text-transform:uppercase; cursor:pointer; border-radius:var(--radius);
+  }
+  .cart-btn:hover{background:rgba(176,141,87,0.18);}
+  .cart-count{
+    position:absolute; top:-8px; right:-8px; background:var(--rose); color:var(--plum-deep);
+    font-size:11px; font-weight:600; width:20px; height:20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .filters{
+    position:sticky; top:64px; z-index:30; background:var(--ivory); border-bottom:1px solid var(--line);
+    padding:14px 24px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  }
+  .filters select, .filters input{
+    font-family:'Jost',sans-serif; font-size:13px; padding:9px 12px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); border-radius:var(--radius); min-width:130px;
+  }
+  .filters input[type="text"]{min-width:200px; flex:1;}
+  .filters .clear{background:none; border:none; color:var(--plum); text-decoration:underline; font-size:13px; cursor:pointer; font-family:'Jost',sans-serif;}
+  .result-count{padding:0 24px; margin:14px 0 0; font-size:13px; color:#8a7b74; letter-spacing:0.03em;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:20px; padding:20px 24px 60px;}
+  .card{background:#fff; border:1px solid var(--line); cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; display:flex; flex-direction:column;}
+  .card:hover{transform:translateY(-3px); box-shadow:0 10px 24px rgba(59,31,43,0.12);}
+  .photo{
+    aspect-ratio:3/4; background:#EFE6DE; display:flex; align-items:center; justify-content:center;
+    padding:22px; position:relative; overflow:hidden;
+  }
+  .photo svg{width:60%; height:60%;}
+  .card-body{padding:12px 14px 16px;}
+  .card-brand{font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--gold);}
+  .card-name{font-size:16px; font-family:'Cormorant Garamond',serif; font-weight:600; margin:4px 0;}
+  .card-price{font-size:14px; color:var(--ink);}
+  .out-tag{display:inline-block; margin-top:6px; font-size:11px; color:#a13b3b; text-transform:uppercase; letter-spacing:0.05em;}
+  .empty-state{padding:60px 24px; text-align:center; color:#a3948c;}
+
+  .overlay{position:fixed; inset:0; background:rgba(42,22,32,0.55); display:none; align-items:center; justify-content:center; z-index:50; padding:20px;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--ivory); max-width:440px; width:100%; padding:28px; border-top:3px solid var(--gold); max-height:88vh; overflow-y:auto;}
+  .modal-photo{background:#EFE6DE; padding:20px; display:flex; align-items:center; justify-content:center; margin-bottom:18px;}
+  .modal-photo svg{width:120px; height:120px;}
+  .modal h2{margin:0 0 2px; font-size:24px;}
+  .modal .modal-brand{font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--gold); margin-bottom:14px;}
+  .modal-price{font-size:16px; margin-bottom:18px;}
+  .option-group{margin-bottom:18px;}
+  .option-label{font-size:12px; text-transform:uppercase; letter-spacing:0.07em; color:#8a7b74; margin-bottom:8px; display:block;}
+  .pill-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{padding:8px 14px; border:1px solid var(--line); background:#fff; font-size:13px; cursor:pointer; border-radius:var(--radius); user-select:none;}
+  .pill.active{background:var(--plum); color:var(--ivory); border-color:var(--plum);}
+  .qty-row{display:flex; align-items:center; gap:14px;}
+  .qty-row button{width:32px; height:32px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:16px;}
+  .modal-actions{display:flex; gap:10px; margin-top:22px;}
+  .btn{flex:1; padding:12px 16px; border:none; cursor:pointer; font-family:'Jost',sans-serif; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; border-radius:var(--radius);}
+  .btn-primary{background:var(--plum); color:var(--ivory);}
+  .btn-primary:disabled{background:#c9bcb6; cursor:not-allowed;}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
+
+  .drawer{position:fixed; top:0; right:-420px; width:100%; max-width:400px; height:100%; background:var(--ivory); box-shadow:-8px 0 30px rgba(0,0,0,0.15); z-index:60; transition:right .25s ease; display:flex; flex-direction:column;}
+  .drawer.show{right:0;}
+  .drawer-head{padding:20px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
+  .drawer-head h2{margin:0; font-size:22px;}
+  .drawer-close{background:none; border:none; font-size:22px; cursor:pointer; color:var(--plum);}
+  .drawer-items{flex:1; overflow-y:auto; padding:16px 22px;}
+  .drawer-item{display:flex; justify-content:space-between; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14px;}
+  .drawer-item .meta{color:#8a7b74; font-size:12px; margin-top:3px;}
+  .drawer-item .remove{background:none; border:none; color:#a13b3b; font-size:12px; cursor:pointer; text-decoration:underline;}
+  .drawer-foot{padding:18px 22px; border-top:1px solid var(--line);}
+  .drawer-empty{padding:40px 20px; text-align:center; color:#a3948c; font-size:14px;}
+  .whatsapp-btn{width:100%; padding:14px; background:#25D366; color:#fff; border:none; font-family:'Jost',sans-serif; font-size:14px; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer;}
+  .whatsapp-btn:disabled{background:#bcd9c9; cursor:not-allowed;}
+  .scrim{position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:55; display:none;}
+  .scrim.show{display:block;}
+  .banner{font-size:12px; text-align:center; padding:8px 16px; background:var(--plum-deep); color:var(--ivory);}
+  footer.note{padding:30px 24px 50px; font-size:12px; color:#a3948c; max-width:640px; line-height:1.6;}
+  @media (max-width:520px){
+    header{padding:14px 16px;}
+    .filters{top:58px; padding:12px 16px;}
+    .grid{padding:16px 16px 50px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="banner" id="dataBanner">Loading catalogue…</div>
+
+<header>
+  <div class="brandmark">Maison <span>Rêve</span></div>
+  <button class="cart-btn" id="openCart">Cart <span class="cart-count" id="cartCount" style="display:none;">0</span></button>
+</header>
+
+<div class="filters">
+  <select id="fBrand"><option value="">All Brands</option></select>
+  <select id="fCategory"><option value="">All Categories</option></select>
+  <select id="fSize"><option value="">All Sizes</option></select>
+  <select id="fColor"><option value="">All Colors</option></select>
+  <input type="text" id="fSearch" placeholder="Search products…">
+  <button class="clear" id="clearFilters">Clear filters</button>
+</div>
+
+<p class="result-count" id="resultCount"></p>
+<div class="grid" id="grid"></div>
+
+<footer class="note">
+  Prototype catalogue with 10 sample products. Card and modal imagery is placeholder line-art
+  by category — swap in real photo URLs via the sheet's <code>image</code> column and the markup
+  will use those instead (see ICONS / getVisual() in the script). Placing an order opens WhatsApp
+  with the selections pre-filled as a message; no payment or stock reservation happens here.
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h2>Your Selection</h2>
+    <button class="drawer-close" id="closeCart">&times;</button>
+  </div>
+  <div class="drawer-items" id="drawerItems"></div>
+  <div class="drawer-foot">
+    <button class="whatsapp-btn" id="placeOrder" disabled>Place Order on WhatsApp</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   HOW TO CONNECT YOUR OWN GOOGLE SHEET
+   ------------------------------------------------------------
+   Columns: id | name | brand | category | price | sizes | colors | stock | image
+   - sizes / colors: pipe-separated, e.g. S|M|L   or   Black|Nude|Red
+   - stock: Y or N
+   - image: optional direct photo URL. Leave blank to keep the line-art placeholder.
+   Publish the sheet as CSV (File > Share > Publish to web > CSV) and paste the link
+   into SHEET_CSV_URL below. Put the shop's WhatsApp number in WHATSAPP_NUMBER.
+============================================================ */
+const SHEET_CSV_URL = ""; // <-- paste published Google Sheet CSV link here
+const WHATSAPP_NUMBER = "91XXXXXXXXXX"; // <-- shop's WhatsApp number, digits only
+
+const DEMO_DATA = [
+  {id:"1", name:"Lace Trim Everyday Bra", brand:"Amara", category:"Bra", price:699, sizes:"32B|34B|36B|38B", colors:"Black|Nude|Rose", stock:"Y", image:""},
+  {id:"2", name:"Silk Touch Nightgown", brand:"Velure", category:"Nightwear", price:1299, sizes:"S|M|L|XL", colors:"Ivory|Wine", stock:"Y", image:""},
+  {id:"3", name:"Cotton Lounge Co-ord", brand:"Amara", category:"Loungewear", price:1499, sizes:"S|M|L", colors:"Grey Melange|Blush", stock:"Y", image:""},
+  {id:"4", name:"Seamless T-shirt Bra", brand:"Velure", category:"Bra", price:599, sizes:"32C|34C|36C", colors:"Black|Skin", stock:"Y", image:""},
+  {id:"5", name:"Satin Robe", brand:"Maison Rêve", category:"Loungewear", price:1899, sizes:"Free Size", colors:"Champagne|Black", stock:"N", image:""},
+  {id:"6", name:"High Waist Brief Pack (3)", brand:"Amara", category:"Innerwear", price:499, sizes:"M|L|XL", colors:"Assorted", stock:"Y", image:""},
+  {id:"7", name:"Printed Sleep Set", brand:"Velure", category:"Nightwear", price:999, sizes:"S|M|L|XL", colors:"Mint Floral|Grey Stripe", stock:"Y", image:""},
+  {id:"8", name:"Padded Push-Up Bra", brand:"Maison Rêve", category:"Bra", price:799, sizes:"32B|34B|36B", colors:"Black|Maroon|Nude", stock:"Y", image:""},
+  {id:"9", name:"Camisole Slip Dress", brand:"Velure", category:"Nightwear", price:899, sizes:"S|M|L", colors:"Champagne|Black", stock:"Y", image:""},
+  {id:"10", name:"Bralette Set", brand:"Amara", category:"Innerwear", price:649, sizes:"S|M|L", colors:"Nude|Lavender", stock:"Y", image:""},
+];
+
+// Minimal line-art icon per category, used whenever a product has no photo URL.
+const ICONS = {
+  "Bra": `<svg viewBox="0 0 100 100" fill="none" stroke="#8C5A3C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 40 C20 30 30 24 38 28 C42 30 44 34 44 40 L44 55 C44 65 34 72 26 66 C20 61 18 50 20 40 Z"/>
+    <path d="M80 40 C80 30 70 24 62 28 C58 30 56 34 56 40 L56 55 C56 65 66 72 74 66 C80 61 82 50 80 40 Z"/>
+    <path d="M44 40 L56 40" />
+    <path d="M30 28 L38 12" /><path d="M70 28 L62 12" />
+  </svg>`,
+  "Nightwear": `<svg viewBox="0 0 100 100" fill="none" stroke="#8C5A3C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 18 L30 30 L20 88 L80 88 L70 30 L62 18" />
+    <path d="M38 18 C42 24 58 24 62 18" />
+    <path d="M30 30 L44 40 L56 40 L70 30" />
+  </svg>`,
+  "Loungewear": `<svg viewBox="0 0 100 100" fill="none" stroke="#8C5A3C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M35 16 L26 26 L20 90" />
+    <path d="M65 16 L74 26 L80 90" />
+    <path d="M26 26 L38 34 L38 90" />
+    <path d="M74 26 L62 34 L62 90" />
+    <path d="M20 90 L80 90" />
+    <path d="M40 55 L60 60" />
+    <path d="M35 16 C42 22 58 22 65 16" />
+  </svg>`,
+  "Innerwear": `<svg viewBox="0 0 100 100" fill="none" stroke="#8C5A3C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 30 L82 30 L74 46 L64 46 L58 62 L50 78 L42 62 L36 46 L26 46 Z" />
+    <path d="M18 30 C18 22 26 18 34 20" />
+    <path d="M82 30 C82 22 74 18 66 20" />
+  </svg>`
+};
+function getVisual(p, size){
+  if(p.image && p.image.trim()){
+    return `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+  const icon = ICONS[p.category] || ICONS["Loungewear"];
+  return icon;
+}
+
+let PRODUCTS = [];
+let CART = [];
+
+function splitField(v){ return (v || "").split("|").map(s=>s.trim()).filter(Boolean); }
+
+function loadData(){
+  if(!SHEET_CSV_URL){
+    PRODUCTS = DEMO_DATA;
+    setBanner("Showing 10 sample products — connect SHEET_CSV_URL in the script to go live.", true);
+    init();
+    return;
+  }
+  Papa.parse(SHEET_CSV_URL, {
+    download:true, header:true,
+    complete:function(results){
+      const rows = results.data.filter(r=>r.id);
+      if(rows.length === 0){
+        PRODUCTS = DEMO_DATA;
+        setBanner("Sheet returned no rows — showing demo data instead.", true);
+      } else {
+        PRODUCTS = rows;
+        setBanner(`Loaded ${rows.length} products from your catalogue sheet.`, false);
+        setTimeout(()=>{ document.getElementById('dataBanner').style.display='none'; }, 3000);
+      }
+      init();
+    },
+    error:function(){
+      PRODUCTS = DEMO_DATA;
+      setBanner("Could not reach the sheet — showing demo data instead.", true);
+      init();
+    }
+  });
+}
+
+function setBanner(text, warn){
+  const b = document.getElementById('dataBanner');
+  b.textContent = text;
+  b.style.background = warn ? "#7a4a2a" : "#2A1620";
+}
+
+function init(){
+  populateFilterOptions();
+  renderGrid();
+  bindEvents();
+}
+
+function populateFilterOptions(){
+  const brands = [...new Set(PRODUCTS.map(p=>p.brand))].sort();
+  const cats = [...new Set(PRODUCTS.map(p=>p.category))].sort();
+  const sizes = [...new Set(PRODUCTS.flatMap(p=>splitField(p.sizes)))].sort();
+  const colors = [...new Set(PRODUCTS.flatMap(p=>splitField(p.colors)))].sort();
+  fillSelect('fBrand', brands);
+  fillSelect('fCategory', cats);
+  fillSelect('fSize', sizes);
+  fillSelect('fColor', colors);
+}
+function fillSelect(id, values){
+  const sel = document.getElementById(id);
+  values.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+function getFiltered(){
+  const brand = document.getElementById('fBrand').value;
+  const category = document.getElementById('fCategory').value;
+  const size = document.getElementById('fSize').value;
+  const color = document.getElementById('fColor').value;
+  const search = document.getElementById('fSearch').value.trim().toLowerCase();
+
+  return PRODUCTS.filter(p=>{
+    if(brand && p.brand !== brand) return false;
+    if(category && p.category !== category) return false;
+    if(size && !splitField(p.sizes).includes(size)) return false;
+    if(color && !splitField(p.colors).includes(color)) return false;
+    if(search && !(`${p.name} ${p.brand}`.toLowerCase().includes(search))) return false;
+    return true;
+  });
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const list = getFiltered();
+  document.getElementById('resultCount').textContent = `${list.length} product${list.length===1?'':'s'}`;
+
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No products match these filters. Try clearing one.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p=>`
+    <div class="card" data-id="${p.id}">
+      <div class="photo">${getVisual(p)}</div>
+      <div class="card-body">
+        <div class="card-brand">${p.brand}</div>
+        <div class="card-name">${p.name}</div>
+        <div class="card-price">₹${p.price}</div>
+        ${p.stock === 'N' ? '<div class="out-tag">Out of stock</div>' : ''}
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', ()=> openModal(card.dataset.id));
+  });
+}
+
+function openModal(id){
+  const p = PRODUCTS.find(x=>x.id === id);
+  if(!p) return;
+  const sizes = splitField(p.sizes);
+  const colors = splitField(p.colors);
+  const outOfStock = p.stock === 'N';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-photo">${getVisual(p)}</div>
+    <div class="modal-brand">${p.brand}</div>
+    <h2>${p.name}</h2>
+    <div class="modal-price">₹${p.price}</div>
+    ${outOfStock ? '<p style="color:#a13b3b; font-size:13px;">Currently out of stock.</p>' : ''}
+    <div class="option-group">
+      <span class="option-label">Size</span>
+      <div class="pill-row" id="sizeRow">
+        ${sizes.map(s=>`<div class="pill" data-size="${s}">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div class="option-group">
+      <span class="option-label">Color</span>
+      <div class="pill-row" id="colorRow">
+        ${colors.map(c=>`<div class="pill" data-color="${c}">${c}</div>`).join('')}
+      </div>
+    </div>
+    <div class="option-group">
+      <span class="option-label">Quantity</span>
+      <div class="qty-row">
+        <button id="qtyMinus">−</button>
+        <span id="qtyVal">1</span>
+        <button id="qtyPlus">+</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalAdd" ${outOfStock ? 'disabled' : ''}>Add to Cart</button>
+    </div>
+  `;
+
+  let selectedSize = null, selectedColor = null, qty = 1;
+
+  document.querySelectorAll('#sizeRow .pill').forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      document.querySelectorAll('#sizeRow .pill').forEach(x=>x.classList.remove('active'));
+      pill.classList.add('active');
+      selectedSize = pill.dataset.size;
+    });
+  });
+  document.querySelectorAll('#colorRow .pill').forEach(pill=>{
+    pill.addEventListener('click', ()=>{
+      document.querySelectorAll('#colorRow .pill').forEach(x=>x.classList.remove('active'));
+      pill.classList.add('active');
+      selectedColor = pill.dataset.color;
+    });
+  });
+  document.getElementById('qtyMinus').addEventListener('click', ()=>{
+    if(qty > 1){ qty--; document.getElementById('qtyVal').textContent = qty; }
+  });
+  document.getElementById('qtyPlus').addEventListener('click', ()=>{
+    qty++; document.getElementById('qtyVal').textContent = qty;
+  });
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('modalAdd').addEventListener('click', ()=>{
+    if(sizes.length && !selectedSize){ alert('Please select a size.'); return; }
+    if(colors.length && !selectedColor){ alert('Please select a color.'); return; }
+    CART.push({
+      productId: p.id, name: p.name, brand: p.brand, price: Number(p.price),
+      size: selectedSize || '-', color: selectedColor || '-', qty
+    });
+    updateCartCount();
+    closeModal();
+    openDrawer();
+  });
+
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+function updateCartCount(){
+  const totalQty = CART.reduce((sum,i)=>sum+i.qty, 0);
+  const countEl = document.getElementById('cartCount');
+  if(totalQty > 0){ countEl.style.display = 'flex'; countEl.textContent = totalQty; }
+  else { countEl.style.display = 'none'; }
+  document.getElementById('placeOrder').disabled = CART.length === 0;
+}
+
+function renderDrawer(){
+  const container = document.getElementById('drawerItems');
+  if(CART.length === 0){
+    container.innerHTML = `<div class="drawer-empty">Your cart is empty. Tap a product to add it.</div>`;
+    return;
+  }
+  container.innerHTML = CART.map((item, idx)=>`
+    <div class="drawer-item">
+      <div>
+        <div><strong>${item.name}</strong></div>
+        <div class="meta">${item.brand} · Size ${item.size} · ${item.color} · Qty ${item.qty}</div>
+      </div>
+      <div style="text-align:right;">
+        <div>₹${item.price * item.qty}</div>
+        <button class="remove" data-idx="${idx}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.remove').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      CART.splice(Number(btn.dataset.idx), 1);
+      updateCartCount();
+      renderDrawer();
+    });
+  });
+}
+
+function openDrawer(){
+  renderDrawer();
+  document.getElementById('drawer').classList.add('show');
+  document.getElementById('scrim').classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('show');
+  document.getElementById('scrim').classList.remove('show');
+}
+
+function buildWhatsAppMessage(){
+  const lines = CART.map((item,i)=>
+    `${i+1}. ${item.name} (${item.brand}) — Size ${item.size}, ${item.color}, Qty ${item.qty} — ₹${item.price * item.qty}`
+  );
+  const total = CART.reduce((sum,i)=>sum + i.price*i.qty, 0);
+  const message = `Hi! I'd like to order:\n\n${lines.join('\n')}\n\nTotal: ₹${total}\n\n(Sent from the online catalogue)`;
+  return encodeURIComponent(message);
+}
+
+function bindEvents(){
+  document.getElementById('overlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'overlay') closeModal();
+  });
+  document.getElementById('openCart').addEventListener('click', openDrawer);
+  document.getElementById('closeCart').addEventListener('click', closeDrawer);
+  document.getElementById('scrim').addEventListener('click', closeDrawer);
+
+  ['fBrand','fCategory','fSize','fColor'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', renderGrid);
+  });
+  document.getElementById('fSearch').addEventListener('input', renderGrid);
+  document.getElementById('clearFilters').addEventListener('click', ()=>{
+    ['fBrand','fCategory','fSize','fColor'].forEach(id=> document.getElementById(id).value = '');
+    document.getElementById('fSearch').value = '';
+    renderGrid();
+  });
+
+  document.getElementById('placeOrder').addEventListener('click', ()=>{
+    if(CART.length === 0) return;
+    const text = buildWhatsAppMessage();
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
