@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVC — Adyar Variety Choice</title>
+<meta name="description" content="Adyar Variety Choice — Chennai's family innerwear store, since 1999. Browse 39 brands, find your size, order on WhatsApp.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ============ WATERMARK ============ -->
+<div class="bg-watermark" aria-hidden="true"></div>
+
+<!-- ============ SWATCH STRIP ============ -->
+<div class="swatch-strip" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="wrap header-row">
+    <a href="#top" class="wordmark">
+      <span class="wordmark-main">AVC</span>
+      <span class="wordmark-sub">Adyar Variety Choice</span>
+    </a>
+
+    <nav class="main-nav" aria-label="Primary">
+      <a href="#catalog">Catalogue</a>
+      <a href="#size-guide">Find my size</a>
+      <a href="#help" id="navHelpLink">Need help?</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="call-btn" href="tel:+919500147575">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2.1L8 10.1a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.6 2Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Call us · 95001 47575</span>
+      </a>
+      <button class="cart-btn" id="cartToggle" aria-haspopup="dialog" aria-controls="cartDrawer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.6L21 8H6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.4"/><circle cx="17" cy="21" r="1.4"/></svg>
+        <span>Cart</span>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap hero-row">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Since 1999 · Adyar, Chennai</p>
+      <h1>Twenty-five years of<br>knowing your size<br><em>by heart.</em></h1>
+      <p class="hero-lead">Now browse the same trusted brands from home — Jockey, Van Heusen, Enamor, Amante and 35 more — then send your order straight to us on WhatsApp.</p>
+      <div class="hero-ctas">
+        <a href="#catalog" class="btn btn-primary">Browse the catalogue</a>
+        <a href="#size-guide" class="btn btn-ghost">Find my size first</a>
+      </div>
+      <p class="hero-note">39 brands · 500+ styles · No account needed</p>
+    </div>
+
+    <div class="hero-swatches" aria-label="Shop by category">
+      <!-- populated by JS from category list, but seeded with a static skeleton for fast paint -->
+      <div class="swatch-grid" id="heroSwatchGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CATALOG ============ -->
+<section class="catalog-section" id="catalog">
+  <div class="wrap">
+
+    <div class="catalog-head">
+      <h2>The catalogue</h2>
+      <p class="muted" id="resultCount">Loading products…</p>
+    </div>
+
+    <div class="catalog-layout">
+
+      <!-- Sidebar filters (desktop: static column · mobile: slide-in drawer) -->
+      <aside class="filter-sidebar" id="filterSidebar" aria-label="Filters">
+        <div class="filter-sidebar-head">
+          <h3>Filter</h3>
+          <div class="filter-sidebar-actions">
+            <button class="link-btn" id="clearFiltersBtn">Clear all</button>
+            <button class="icon-btn filter-sidebar-close" id="filterSidebarClose" aria-label="Close filters">✕</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Brand</span>
+          <select id="brandFilter" aria-label="Filter by brand">
+            <option value="">All brands</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Shopping for</span>
+          <select id="genderFilter" aria-label="Filter by department">
+            <option value="">Everyone</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Category</span>
+          <div class="filter-list" id="categoryChips">
+            <button class="chip is-active" data-cat="">All categories</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Style</span>
+          <div class="filter-list" id="tagChips">
+            <button class="chip chip-tag" data-tag="padded">Padded</button>
+            <button class="chip chip-tag" data-tag="sports">Sports / Active</button>
+            <button class="chip chip-tag" data-tag="strapless">Strapless</button>
+            <button class="chip chip-tag" data-tag="feeding">Feeding &amp; nursing</button>
+            <button class="chip chip-tag" data-tag="shapewear">Shapewear</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main catalogue column -->
+      <div class="catalog-main">
+
+        <div class="filter-bar">
+          <div class="filter-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+            <input type="text" id="searchInput" placeholder="Search brand, style, or fabric…" aria-label="Search products">
+          </div>
+
+          <button class="btn btn-outline filter-open-btn" id="filterOpenBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round"/></svg>
+            Filters
+            <span class="filter-count" id="filterCount" hidden>0</span>
+          </button>
+
+          <select id="sortSelect" aria-label="Sort products">
+            <option value="relevance">Sort: Featured</option>
+            <option value="price-asc">Price: Low to high</option>
+            <option value="price-desc">Price: High to low</option>
+            <option value="brand">Brand: A–Z</option>
+          </select>
+        </div>
+
+        <div class="gender-pill-row" id="genderPillRow">
+          <button class="gender-pill is-active" data-gender="">Everyone</button>
+          <button class="gender-pill" data-gender="Women">Women</button>
+          <button class="gender-pill" data-gender="Men">Men</button>
+          <button class="gender-pill" data-gender="Kids">Kids</button>
+        </div>
+
+        <div class="active-filter-row" id="activeFilterRow" hidden></div>
+
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+
+        <div class="load-more-wrap">
+          <button class="btn btn-outline" id="loadMoreBtn">Show more styles</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIZE GUIDE ============ -->
+<section class="size-guide" id="size-guide">
+  <div class="wrap">
+    <div class="sg-intro">
+      <p class="hero-eyebrow">Find my size</p>
+      <h2>Measure once,<br>shop with confidence.</h2>
+      <p class="muted">Grab a soft measuring tape (or a piece of string and a ruler). Pick who you're shopping for below — it takes about a minute.</p>
+    </div>
+
+    <div class="sg-panel">
+      <div class="sg-tabs" role="tablist" aria-label="Choose a size calculator">
+        <button class="sg-tab is-active" data-target="tab-bra" role="tab" aria-selected="true">Women's bra</button>
+        <button class="sg-tab" data-target="tab-panty" role="tab" aria-selected="false">Women's bottoms</button>
+        <button class="sg-tab" data-target="tab-men" role="tab" aria-selected="false">Men's innerwear</button>
+        <button class="sg-tab" data-target="tab-kids" role="tab" aria-selected="false">Kids</button>
+      </div>
+
+      <!-- BRA CALCULATOR -->
+      <div class="sg-tabpanel is-active" id="tab-bra" role="tabpanel">
+        <div class="sg-grid">
+          <div class="sg-form">
+            <label class="sg-field">
+              <span>Underbust (band), snug fit — in inches</span>
+              <input type="number" id="braBand" min="20" max="55" step="0.5" placeholder="e.g. 32">
+            </label>
+            <label class="sg-field">
+              <span>Fullest part of bust — in inches</span>
+              <input type="number" id="braBust" min="20" max="60" step="0.5" placeholder="e.g. 35">
+            </label>
+            <button class="btn btn-primary" id="braCalcBtn">Calculate my size</button>
+          </div>
+          <div class="sg-result" id="braResult">
+            <div class="sg-result-placeholder">
+              <p>Wrap the tape snugly around your ribcage, just under the bust, for the band number. Then measure loosely around the fullest part of your bust. We'll do the maths.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOMS CALCULATOR -->
+      <div class="sg-tabpanel" id="tab-panty" role="tabpanel">
+        <div class="sg-grid">
+          <div class="sg-form">
+            <label class="sg-field">
+              <span>Hip measurement, fullest part — in inches</span>
+              <input type="number" id="pantyHip" min="24" max="60" step="0.5" placeholder="e.g. 38">
+            </label>
+            <button class="btn btn-primary" id="pantyCalcBtn">Calculate my size</button>
+          </div>
+          <div class="sg-result" id="pantyResult">
+            <div class="sg-result-placeholder">
+              <p>Stand naturally and measure around the widest part of your hips, tape parallel to the floor.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEN CALCULATOR -->
+      <div class="sg-tabpanel" id="tab-men" role="tabpanel">
+        <div class="sg-grid">
+          <div class="sg-form">
+            <label class="sg-field">
+              <span>Waist measurement, at the navel — in inches</span>
+              <input type="number" id="menWaist" min="22" max="60" step="0.5" placeholder="e.g. 34">
+            </label>
+            <button class="btn btn-primary" id="menCalcBtn">Calculate my size</button>
+          </div>
+          <div class="sg-result" id="menResult">
+            <div class="sg-result-placeholder">
+              <p>Measure around your natural waistline, where you'd normally wear a trouser waistband. Keep the tape snug, not tight.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KIDS CALCULATOR -->
+      <div class="sg-tabpanel" id="tab-kids" role="tabpanel">
+        <div class="sg-grid">
+          <div class="sg-form">
+            <label class="sg-field">
+              <span>Child's age — in years</span>
+              <input type="number" id="kidsAge" min="1" max="16" step="1" placeholder="e.g. 8">
+            </label>
+            <button class="btn btn-primary" id="kidsCalcBtn">Calculate size</button>
+          </div>
+          <div class="sg-result" id="kidsResult">
+            <div class="sg-result-placeholder">
+              <p>Our kidswear runs by age band — this gives a solid starting point, sized generously for room to grow.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT / FOOTER ============ -->
+<footer class="site-footer" id="help">
+  <div class="wrap footer-row">
+    <div class="footer-brand">
+      <span class="wordmark-main">AVC</span>
+      <p>Adyar Variety Choice — multibrand innerwear, nightwear &amp; essentials for the whole family, in Chennai since 1999.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Ordering</h3>
+      <p class="muted">Add styles to your cart, then tap <strong>Place order on WhatsApp</strong>. We'll confirm size, stock and price with you directly on chat.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Talk to us</h3>
+      <p class="muted">Prefer to just ask? Reach us directly.</p>
+      <div class="footer-contact-row">
+        <a class="btn btn-whatsapp btn-small" id="footerWhatsapp" target="_blank" rel="noopener">Chat on WhatsApp</a>
+        <a class="btn btn-outline btn-small" href="tel:+919500147575">Call · 95001 47575</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <p class="muted small">This catalogue is a working reference — colours, sizes and stock are confirmed at the time of ordering.</p>
+  </div>
+</footer>
+
+<!-- ============ CART DRAWER ============ -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Your cart" aria-hidden="true">
+  <div class="cart-drawer-head">
+    <h2>Your cart</h2>
+    <button class="icon-btn" id="cartClose" aria-label="Close cart">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <p class="cart-empty">Your cart is empty — add a few styles to get started.</p>
+  </div>
+  <div class="cart-drawer-foot">
+    <div class="cart-total-row">
+      <span>Estimated total</span>
+      <strong id="cartTotal">₹0</strong>
+    </div>
+    <p class="muted small">Final price &amp; sizes confirmed on WhatsApp before dispatch.</p>
+    <button class="btn btn-whatsapp btn-full" id="placeOrderBtn">Place order on WhatsApp</button>
+  </div>
+</aside>
+
+<!-- ============ HELP CHAT WIDGET ============ -->
+<button class="chat-fab" id="chatFab" aria-haspopup="dialog" aria-controls="chatPanel">
+  <span class="chat-fab-dot"></span>
+  Need help?
+</button>
+
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="Shopping assistant" aria-hidden="true">
+  <div class="chat-panel-head">
+    <div>
+      <strong>AVC Assistant</strong>
+      <p class="muted small">Ask for a brand or a style — I'll pull it up.</p>
+    </div>
+    <button class="icon-btn" id="chatClose" aria-label="Close chat">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-msg chat-msg-bot">
+      Hi! Try typing a brand like <button class="chat-inline-btn" data-fill="Jockey">Jockey</button>, or a style like <button class="chat-inline-btn" data-fill="padded bra">padded bra</button> or <button class="chat-inline-btn" data-fill="boxer briefs">boxer briefs</button>.
+    </div>
+  </div>
+  <div class="chat-input-wrap">
+    <div class="chat-suggest" id="chatSuggest" role="listbox" hidden></div>
+    <form class="chat-input-row" id="chatForm">
+      <input type="text" id="chatInput" placeholder="e.g. Van Heusen trunks" autocomplete="off"
+        role="combobox" aria-expanded="false" aria-controls="chatSuggest" aria-autocomplete="list">
+      <button type="submit" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M14 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ PRODUCT QUICK VIEW ============ -->
+<div class="drawer-overlay" id="quickViewOverlay"></div>
+<div class="quickview" id="quickView" role="dialog" aria-hidden="true">
+  <button class="icon-btn quickview-close" id="quickViewClose" aria-label="Close">✕</button>
+  <div id="quickViewBody"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
